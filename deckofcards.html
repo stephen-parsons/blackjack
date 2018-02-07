@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Blackjack!</title>
+</head>
+<body>
+
+	<div id="deal"></div>
+
+	<div id="winOrLose"></div>
+
+	<div id="hand"></div>
+
+	<button id="playerHit">Hit!</button>
+
+	<button id="playerLet">Let</button>
+
+	<script type="text/javascript">
+		
+		class DeckOfCards{
+			constructor(){
+				this.cards=[];
+				this.deal=[];
+				this.reset();	
+			}
+
+			reset(){
+				let arr = [];
+				for (var i=1; i<53; i++){
+					arr.push(i);
+				}
+				this.cards=arr;
+				return this;
+			}
+
+			shuffle(){
+				for (let i = this.cards.length - 1; i > 0; i--) {
+			        let j = Math.floor(Math.random() * (i + 1));
+			        [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
+			    }
+				return this;
+			}
+
+			static deal(deck){
+				let card = Math.floor(Math.random() * (deck.cards.length-1));
+				let index = deck.cards.indexOf(card);
+				deck.cards.slice(index,1);
+				return card;
+			}
+
+			static convertNumToCard(deck){
+				let cardUrls = [];
+				for (let card in deck){
+					
+					// CHECK CARD TYPE
+
+					if (deck[card] > 0 && deck[card] <= 13){
+						var type = "s"
+						var typeNum = 0
+					}
+					else if (deck[card] > 13 && deck[card] <= 26){
+						var type = "h"
+						var typeNum = 13
+					}
+					else if (deck[card] > 26 &&  deck[card]<= 39){
+						var type = "d"
+						var typeNum = 26
+					}
+					else if (deck[card] > 39){
+						var type = "c"
+						var typeNum = 39
+					}		
+
+					// CHECK CARD NUM
+
+					if (deck[card] > typeNum && deck[card] < (typeNum+11)){
+						cardUrls.push(type+(deck[card]-typeNum)+".png");
+					}
+					else if (deck[card] == typeNum+11){
+						cardUrls.push(type+"j.png");
+					}
+					else if (deck[card] == typeNum+12){
+						cardUrls.push(type+"q.png");
+					}
+					else if (deck[card] == typeNum+13){
+						cardUrls.push(type+"k.png");
+					}		
+				}
+				return cardUrls;
+			}
+		}
+
+		class Player{
+			constructor(name){
+				this.name=name;
+				this.hand =[];
+			}
+
+			takeCard(deck){
+				this.hand.push(DeckOfCards.deal(deck));
+				displayHand(DeckOfCards.convertNumToCard(player.hand));
+				return this;
+			}
+
+			discard(){
+				if (this.hand.length == 0){
+					this.hand.slice(Math.floor(Math.random() * (hand.length-1)), 1)
+					return this;
+				} else {
+					console.log("You don't have any cards!");
+				}
+			}
+		}
+
+
+		function displayDealer(cardUrls, reveal){
+			if (reveal == true){
+				document.getElementById('deal').innerHTML = "";
+				for (card in cardUrls){
+					document.getElementById('deal').innerHTML += "<img src=cards-png/"+cardUrls[card]+"></img>";
+				}
+			}
+			else{
+			document.getElementById('deal').innerHTML = "<img src=cards-png/"+cardUrls[0]+"></img>" + "<img src=cards-png/b1fv.png></img>";
+			}
+		}
+
+		function displayHand(cardUrls){
+			document.getElementById('hand').innerHTML = "";
+			for (card in cardUrls){
+				document.getElementById('hand').innerHTML += "<img src=cards-png/"+cardUrls[card]+"></img>";
+			}
+		}
+
+		// function newHand(player){
+		// 	player.hand = [];
+		// 	player.takeCard(deck).takeCard(deck)
+		// }
+
+		function newDeal(player, deck){
+			deck.deal=[];
+			player.hand=[];
+			deck.deal.push(DeckOfCards.deal(deck));
+			deck.deal.push(DeckOfCards.deal(deck));
+		}
+
+		function shuffleDeck(deck){
+			deck.shuffle();
+		}
+
+		function hit(player, deck){
+			player.takeCard(deck);
+			calculatePlayer(player.hand);
+			console.log(playerPoints);
+			console.log(dealerPoints);
+			if (playerPoints > 21){
+				displayDealer(DeckOfCards.convertNumToCard(deck.deal), true);
+				document.getElementById('winOrLose').innerHTML = "<h1>You Lose!</h1>";
+				var newGame = setTimeout(()=>{initialize()}, 2000);
+			}
+			// else if (playerPoints <= 21 && playerPoints > dealerPoints){
+			// 	document.getElementById('winOrLose').innerHTML = "<h1>You Win!</h1>";
+			// 	var newGame = setTimeout(()=>{initialize()}, 2000);
+			// }
+		}
+
+		function let(deck){
+			displayDealer(DeckOfCards.convertNumToCard(deck.deal), true);
+			if (playerPoints > 21 || (playerPoints < 21 && playerPoints < dealerPoints)){
+				document.getElementById('winOrLose').innerHTML = "<h1>You Lose!</h1>";
+				var newGame = setTimeout(()=>{initialize()}, 2000);
+			}
+			else if (playerPoints <= 21 && playerPoints > dealerPoints){
+				document.getElementById('winOrLose').innerHTML = "<h1>You Win!</h1>";
+				var newGame = setTimeout(()=>{initialize()}, 2000);
+			}
+		}
+
+		function calculateDealer(cards){
+			for (card in cards){
+				newCard = cards[card];
+				while (newCard >= 14){
+					newCard -= 13;
+				}
+				if (newCard > 10){
+					newCard = 10;
+				}
+				dealerPoints += newCard;
+			}
+		}
+
+		function calculatePlayer(cards){
+			playerPoints=0;
+			for (card in cards){
+				newCard = cards[card];
+				while (newCard >= 14){
+					newCard -= 13;
+				}
+				if (newCard > 10){
+					newCard =10;
+				}
+				playerPoints += newCard;
+			}
+		}
+
+		function initialize(){
+			document.getElementById('winOrLose').innerHTML = "";
+			document.getElementById('hand').innerHTML = "";
+			document.getElementById('deal').innerHTML = "";
+			dealerPoints = 0;
+			playerPoints = 0;
+			deck.reset();
+			shuffleDeck(deck);
+			newDeal(player, deck);
+			displayDealer(DeckOfCards.convertNumToCard(deck.deal), false);
+			calculateDealer(deck.deal);
+		}
+
+		var deck = new DeckOfCards();
+		var player = new Player("Stephen");
+		
+		var dealerPoints = 0;
+		var playerPoints = 0;
+		var button = document.getElementById("playerHit");
+		button.addEventListener("click", ()=>(hit(player,deck)));
+
+		var button2 = document.getElementById("playerLet");
+		button2.addEventListener("click", ()=>(let(deck)));
+
+		initialize();
+		
+	</script>
+
+</body>
+</html>
